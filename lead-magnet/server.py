@@ -33,6 +33,9 @@ WEB_DIR = Path(__file__).resolve().parent / "web"
 ADMIN_KEY = os.environ.get("ADMIN_KEY", "changeme")
 MAX_BODY = 16 * 1024
 AGENCY = config.load()
+# No SMTP host means send_worker.py cannot deliver anything, so the page must
+# not tell people to go look in their inbox.
+SENDING_ENABLED = bool(os.environ.get("SMTP_HOST"))
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -183,7 +186,12 @@ class Handler(BaseHTTPRequestHandler):
                 sequences.schedule_for(lead, start=datetime.now(timezone.utc)),
             )
 
-        self._json(200, {"ok": True, "token": token, "report_url": f"/report?t={token}"})
+        self._json(200, {
+            "ok": True,
+            "token": token,
+            "report_url": f"/report?t={token}",
+            "emailed": SENDING_ENABLED,
+        })
 
     # --- pages -----------------------------------------------------------
 

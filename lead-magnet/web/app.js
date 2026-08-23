@@ -172,6 +172,12 @@
         doneBox.hidden = false;
         var link = document.getElementById("reportLink");
         link.href = res.body.report_url;
+        /* Only promise an email when the server can actually send one -
+           otherwise people rely on an inbox copy that never arrives and
+           lose their report. */
+        document.getElementById("doneNote").textContent = res.body.emailed
+          ? "We also emailed you the link so you can find it later."
+          : "Save or bookmark this link — it is the only copy.";
         document.getElementById("shareLink").href =
           window.location.origin + "/?src=referral";
         doneBox.scrollIntoView({ behavior: "smooth", block: "center" });

@@ -271,6 +271,25 @@ def due_emails(now: str | None = None, db_path: Path | str = DB_PATH) -> list[di
     return [dict(r) for r in rows]
 
 
+def pending_steps(lead_id: int, db_path: Path | str = DB_PATH) -> list[int]:
+    with connect(db_path) as conn:
+        rows = conn.execute(
+            "SELECT step FROM email_queue WHERE lead_id=? AND sent_at IS NULL "
+            "ORDER BY step", (lead_id,)
+        ).fetchall()
+    return [r["step"] for r in rows]
+
+
+def reschedule_step(lead_id: int, step: int, send_after: str,
+                    db_path: Path | str = DB_PATH) -> None:
+    with connect(db_path) as conn:
+        conn.execute(
+            "UPDATE email_queue SET send_after=? "
+            "WHERE lead_id=? AND step=? AND sent_at IS NULL",
+            (send_after, lead_id, step),
+        )
+
+
 def mark_sent(queue_id: int, db_path: Path | str = DB_PATH) -> None:
     with connect(db_path) as conn:
         conn.execute(

@@ -24,9 +24,43 @@ import argparse
 import os
 import smtplib
 import sys
+from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 
-from leadmagnet import storage
+from leadmagnet import sequences, storage
+
+
+def one_per_lead(due: list[dict]) -> list[dict]:
+    """Collapse a backlog to the earliest unsent step per lead.
+
+    If leads were captured before SMTP was configured, every step of every
+    sequence comes due the moment sending is switched on. Delivering six
+    emails at once is a spam complaint, not a nurture sequence - so send the
+    oldest step now and let the rest be re-spaced.
+    """
+    first: dict[int, dict] = {}
+    for item in due:
+        current = first.get(item["lead_id"])
+        if current is None or item["step"] < current["step"]:
+            first[item["lead_id"]] = item
+    return sorted(first.values(), key=lambda i: i["send_after"])
+
+
+def respace_remaining(lead_id: int, sent_step: int,
+                      now: datetime | None = None) -> int:
+    """Re-space a lead's remaining steps relative to the one just sent."""
+    now = now or datetime.now(timezone.utc)
+    base = sequences.SCHEDULE.get(sent_step, 0)
+    moved = 0
+    for step in storage.pending_steps(lead_id):
+        offset = sequences.SCHEDULE.get(step)
+        if offset is None or offset <= base:
+            continue
+        when = now + timedelta(days=offset - base)
+        storage.reschedule_step(lead_id, step,
+                                when.isoformat(timespec="seconds"))
+        moved += 1
+    return moved
 
 
 def build_message(item: dict, sender: str) -> EmailMessage:
@@ -54,11 +88,17 @@ def main() -> int:
     args = parser.parse_args()
 
     storage.init_db()
-    due = storage.due_emails()[: args.limit]
+    backlog = storage.due_emails()
+    due = one_per_lead(backlog)[: args.limit]
 
     if not due:
         print("Nothing due.")
         return 0
+
+    held = len(backlog) - len(due)
+    if held:
+        print(f"{held} message(s) held back so no one gets a burst; "
+              f"they will be re-spaced after this run.")
 
     if args.dry_run:
         for item in due:
@@ -87,6 +127,7 @@ def main() -> int:
             try:
                 smtp.send_message(build_message(item, sender))
                 storage.mark_sent(item["id"])
+                respace_remaining(item["lead_id"], item["step"])
                 sent += 1
                 print(f"sent step {item['step']} -> {item['email']}")
             except smtplib.SMTPException as exc:

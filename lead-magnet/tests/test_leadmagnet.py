@@ -246,6 +246,67 @@ class TestQueue(unittest.TestCase):
         self.assertEqual(storage.due_emails(db_path=self.db), [])
 
 
+class TestBacklogPacing(unittest.TestCase):
+    """Leads captured before SMTP existed must not get six emails at once."""
+
+    def setUp(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        import send_worker
+        self.worker = send_worker
+        self.dir = tempfile.TemporaryDirectory()
+        self.db = Path(self.dir.name) / "backlog.db"
+        storage.init_db(self.db)
+        result = scoring.score(scoring.Answers(
+            annual_income=80_000, dependents=1, auto_liability_limit=25_000)).to_dict()
+        self.tokens = []
+        for email in ("a@example.com", "b@example.com"):
+            token = storage.save_lead(email=email, first_name="X", consent=True,
+                                      result=result, db_path=self.db)
+            lead = storage.get_lead(token, self.db)
+            # Opted in three weeks ago: every step is now overdue.
+            start = datetime.now(timezone.utc) - timedelta(days=21)
+            storage.enqueue(lead["id"], sequences.schedule_for(lead, start=start),
+                            db_path=self.db)
+            self.tokens.append(token)
+
+    def tearDown(self):
+        self.dir.cleanup()
+
+    def test_whole_sequence_is_due_at_once(self):
+        due = storage.due_emails(db_path=self.db)
+        self.assertEqual(len(due), 2 * len(sequences.SCHEDULE))
+
+    def test_worker_takes_only_the_earliest_step_per_lead(self):
+        picked = self.worker.one_per_lead(storage.due_emails(db_path=self.db))
+        self.assertEqual(len(picked), 2)
+        self.assertEqual({p["step"] for p in picked}, {1})
+        self.assertEqual(len({p["lead_id"] for p in picked}), 2)
+
+    def test_respacing_pushes_later_steps_into_the_future(self):
+        lead = storage.get_lead(self.tokens[0], self.db)
+        storage.mark_sent(
+            next(d["id"] for d in storage.due_emails(db_path=self.db)
+                 if d["lead_id"] == lead["id"] and d["step"] == 1), self.db)
+
+        now = datetime.now(timezone.utc)
+        for step in storage.pending_steps(lead["id"], self.db):
+            offset = sequences.SCHEDULE[step]
+            storage.reschedule_step(
+                lead["id"], step,
+                (now + timedelta(days=offset)).isoformat(timespec="seconds"),
+                self.db)
+
+        still_due = [d for d in storage.due_emails(db_path=self.db)
+                     if d["lead_id"] == lead["id"]]
+        self.assertEqual(still_due, [], "no further mail should be due today")
+
+    def test_original_gaps_are_preserved_when_respacing(self):
+        # Sending step 2 should put step 3 one day out, not three.
+        base = sequences.SCHEDULE[2]
+        self.assertEqual(sequences.SCHEDULE[3] - base, 2)
+        self.assertEqual(sequences.SCHEDULE[6] - base, 15)
+
+
 class TestSequences(unittest.TestCase):
 
     def setUp(self):
