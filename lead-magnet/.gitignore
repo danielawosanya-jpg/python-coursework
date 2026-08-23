@@ -1,0 +1,7 @@
+leads.db
+leads.db-wal
+leads.db-shm
+worker.log
+__pycache__/
+*.pyc
+.env

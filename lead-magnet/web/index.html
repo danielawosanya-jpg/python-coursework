@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coverage Gap Finder — find out what your insurance doesn't cover in 3 minutes</title>
+<meta name="description" content="Answer 10 questions and get a personalized Coverage Gap Report: your protection score, every gap we find, what it would cost you at claim time, and the fix. Free, no phone call required.">
+<meta property="og:title" content="What does your insurance actually not cover?">
+<meta property="og:description" content="A free 3-minute check that gives you a protection score and a plain-English report on every gap. No phone number required.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <span class="brand">🛡️ Coverage Gap Finder</span>
+  <span class="brand-by">by <strong>[Your Agency]</strong></span>
+</header>
+
+<main>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Free · 3 minutes · No phone number required</p>
+    <h1>Find out what your insurance <em>doesn't</em> cover — before you need it to.</h1>
+    <p class="sub">
+      Most people find out their coverage was short on the worst day of their
+      life. Answer 10 questions and get a personalized Coverage Gap Report:
+      your protection score, every gap we find, what each one would cost you at
+      claim time, and exactly how to fix it.
+    </p>
+    <a class="btn btn-primary btn-lg" href="#quiz">Get my Coverage Gap Report →</a>
+    <ul class="trust">
+      <li>✓ No sales call to get your results</li>
+      <li>✓ We don't sell or share your data</li>
+      <li>✓ Unsubscribe in one click</li>
+    </ul>
+  </div>
+
+  <aside class="hero-card">
+    <p class="hero-card-label">What you get</p>
+    <div class="preview">
+      <div class="preview-row"><span>Protection score</span><b>0–100</b></div>
+      <div class="preview-row"><span>Life insurance need</span><b>$ exact</b></div>
+      <div class="preview-row"><span>Liability exposure</span><b>Flagged</b></div>
+      <div class="preview-row"><span>Income protection</span><b>Checked</b></div>
+      <div class="preview-row"><span>Property under-insurance</span><b>Checked</b></div>
+      <div class="preview-row"><span>Fix for each gap</span><b>Plain English</b></div>
+    </div>
+    <p class="hero-card-note">
+      Built from the same DIME and replacement-cost math a licensed agent runs
+      on a paid review.
+    </p>
+  </aside>
+</section>
+
+<!-- ================= PROBLEM ================= -->
+<section class="band">
+  <h2>The expensive part isn't the missing policy. It's the limit nobody looked at.</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>State-minimum auto</h3>
+      <p>Saves about $9 a month. One serious at-fault accident clears the limit
+         in an afternoon, and the balance follows you — wages, liens, years.</p>
+    </div>
+    <div class="card">
+      <h3>Life coverage from 2015</h3>
+      <p>You bought $100k before the house, the second kid and the raise.
+         Nothing about your life is the same. The policy never got the memo.</p>
+    </div>
+    <div class="card">
+      <h3>Nothing on your income</h3>
+      <p>You insure the car that gets you to work and the house work pays for,
+         and nothing at all on the paycheck underneath both.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section id="quiz" class="quiz-section">
+  <div class="quiz-shell">
+    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    <p class="progress-label" id="progressLabel">Step 1 of 5</p>
+
+    <form id="quizForm" novalidate>
+
+      <!-- step 1 -->
+      <fieldset class="step is-active" data-step="1">
+        <legend>First, the basics</legend>
+        <label>Your age
+          <input type="number" name="age" min="18" max="100" inputmode="numeric" placeholder="38">
+        </label>
+        <label>Your annual income (before tax)
+          <input type="text" name="annual_income" inputmode="numeric" placeholder="$95,000">
+        </label>
+        <label>Your spouse's or partner's annual income <span class="opt">optional</span>
+          <input type="text" name="spouse_income" inputmode="numeric" placeholder="$0">
+        </label>
+        <label>How many people depend on your income?
+          <input type="number" name="dependents" min="0" max="12" inputmode="numeric" placeholder="2">
+        </label>
+      </fieldset>
+
+      <!-- step 2 -->
+      <fieldset class="step" data-step="2">
+        <legend>What you owe, what you've saved</legend>
+        <label>Mortgage balance remaining <span class="opt">$0 if you rent</span>
+          <input type="text" name="mortgage_balance" inputmode="numeric" placeholder="$310,000">
+        </label>
+        <label>All other debt (cars, cards, student loans)
+          <input type="text" name="other_debt" inputmode="numeric" placeholder="$28,000">
+        </label>
+        <label>Liquid savings you could reach this week
+          <input type="text" name="liquid_savings" inputmode="numeric" placeholder="$18,000">
+        </label>
+        <label>Your rough net worth <span class="opt">a guess is fine</span>
+          <input type="text" name="net_worth" inputmode="numeric" placeholder="$240,000">
+        </label>
+      </fieldset>
+
+      <!-- step 3 -->
+      <fieldset class="step" data-step="3">
+        <legend>Life &amp; income coverage</legend>
+        <label>Total life insurance you carry today <span class="opt">include work coverage</span>
+          <input type="text" name="existing_life_coverage" inputmode="numeric" placeholder="$100,000">
+        </label>
+        <div class="choice">
+          <p class="choice-q">Do you have disability income insurance?</p>
+          <label class="radio"><input type="radio" name="has_disability_insurance" value="yes"> Yes</label>
+          <label class="radio"><input type="radio" name="has_disability_insurance" value="no" checked> No / not sure</label>
+        </div>
+        <div class="choice">
+          <p class="choice-q">Do you have a personal umbrella policy?</p>
+          <label class="radio"><input type="radio" name="has_umbrella" value="yes"> Yes</label>
+          <label class="radio"><input type="radio" name="has_umbrella" value="no" checked> No / not sure</label>
+        </div>
+      </fieldset>
+
+      <!-- step 4 -->
+      <fieldset class="step" data-step="4">
+        <legend>Auto &amp; property</legend>
+        <label>Auto bodily-injury liability, per person <span class="opt">on your dec page, e.g. 100/300</span>
+          <select name="auto_liability_limit">
+            <option value="">Not sure</option>
+            <option value="25000">$25,000 (state minimum in many states)</option>
+            <option value="50000">$50,000</option>
+            <option value="100000">$100,000</option>
+            <option value="250000">$250,000</option>
+            <option value="500000">$500,000 or more</option>
+          </select>
+        </label>
+        <div class="choice">
+          <p class="choice-q">Do you own or rent?</p>
+          <label class="radio"><input type="radio" name="renter" value="no" checked> Own</label>
+          <label class="radio"><input type="radio" name="renter" value="yes"> Rent</label>
+        </div>
+        <div id="ownerFields">
+          <label>Your home's current value
+            <input type="text" name="home_value" inputmode="numeric" placeholder="$520,000">
+          </label>
+          <label>Dwelling coverage (Coverage A) on your policy <span class="opt">leave blank if unsure</span>
+            <input type="text" name="home_dwelling_coverage" inputmode="numeric" placeholder="$350,000">
+          </label>
+        </div>
+        <div id="renterFields" hidden>
+          <div class="choice">
+            <p class="choice-q">Do you have renters insurance?</p>
+            <label class="radio"><input type="radio" name="has_renters_insurance" value="yes"> Yes</label>
+            <label class="radio"><input type="radio" name="has_renters_insurance" value="no" checked> No</label>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- step 5: the gate -->
+      <fieldset class="step" data-step="5">
+        <legend>Your report is ready</legend>
+
+        <div class="teaser" id="teaser" aria-live="polite">
+          <div class="teaser-score">
+            <span class="teaser-num" id="teaserScore">–</span>
+            <span class="teaser-den">/100</span>
+          </div>
+          <div class="teaser-copy">
+            <p class="teaser-band" id="teaserBand">Scoring…</p>
+            <p class="teaser-line" id="teaserLine">Crunching your numbers.</p>
+          </div>
+        </div>
+
+        <p class="gate-copy">
+          Tell us where to send the full breakdown — every gap, the dollar
+          exposure on each, and the specific fix. It arrives in about a minute.
+        </p>
+
+        <label>First name
+          <input type="text" name="first_name" autocomplete="given-name" placeholder="Alex">
+        </label>
+        <label>Email <span class="req">required</span>
+          <input type="email" name="email" autocomplete="email" required placeholder="you@email.com">
+        </label>
+        <label>ZIP code <span class="opt">so we can flag state-specific rules</span>
+          <input type="text" name="zip_code" autocomplete="postal-code" inputmode="numeric" placeholder="30301">
+        </label>
+
+        <label class="consent">
+          <input type="checkbox" name="consent" required>
+          <span>Email me my Coverage Gap Report and follow-up tips. I can
+                unsubscribe any time. <strong>No phone calls unless I ask.</strong></span>
+        </label>
+
+        <p class="error" id="formError" role="alert" hidden></p>
+      </fieldset>
+
+      <div class="nav">
+        <button type="button" class="btn btn-ghost" id="backBtn" hidden>← Back</button>
+        <button type="button" class="btn btn-primary" id="nextBtn">Next →</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn" hidden>
+          Send me my report →
+        </button>
+      </div>
+    </form>
+
+    <div class="done" id="done" hidden>
+      <h2>Your report is ready.</h2>
+      <p>We also emailed you the link so you can find it later.</p>
+      <a class="btn btn-primary btn-lg" id="reportLink" href="#">Open my Coverage Gap Report →</a>
+      <p class="done-share">
+        Know someone who should run this? Send them
+        <a href="#quiz" id="shareLink">this link</a> — that's the only way this
+        thing spreads. We don't buy ads.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHY TRUST ================= -->
+<section class="band band-alt">
+  <h2>Why we give this away</h2>
+  <div class="two-col">
+    <p>
+      We don't run ads. Every person who finds this found it because someone
+      shared it, or because it answered the exact question they typed into a
+      search bar. That only works if the report is genuinely useful whether or
+      not you ever talk to us.
+    </p>
+    <p>
+      So the report is complete. It names your gaps, sizes them in dollars, and
+      tells you what to do — including the times the right answer is "change
+      nothing." If you'd rather take it to your current agent, take it. If you'd
+      like us to read your actual declarations page, that offer is at the bottom
+      of the report.
+    </p>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="faq">
+  <h2>Straight answers</h2>
+  <details><summary>Will someone call me?</summary>
+    <p>No. We ask for an email, not a phone number, and we don't buy or look up
+       phone numbers. If you want to talk, there's a booking link in the report.</p></details>
+  <details><summary>Is this a quote?</summary>
+    <p>No. It's an educational estimate of where your protection is thin. It is
+       not an offer of coverage, a rate, or a guarantee that any claim would be
+       paid. Nothing here is insurance, legal or tax advice.</p></details>
+  <details><summary>How accurate is the math?</summary>
+    <p>It uses standard industry methods — DIME for life needs, income
+       multiples for disability, replacement-cost ratios for property. Those are
+       the same rules of thumb behind a paid needs analysis. They're a starting
+       point, not a substitute for reading your actual policy.</p></details>
+  <details><summary>What do you do with my answers?</summary>
+    <p>They generate your report and stay in our own database. We don't sell,
+       rent or share lead data with third parties, and unsubscribing stops
+       every email immediately.</p></details>
+  <details><summary>I already have an agent.</summary>
+    <p>Good. Run the report and bring it to them. A second opinion that costs
+       nothing is the cheapest due diligence in personal finance.</p></details>
+</section>
+
+</main>
+
+<footer class="sitefoot">
+  <p><strong>[Your Agency]</strong> · [Your Name] · [State] license #[0000000]<br>
+     Licensed in [ST, ST] · [Street, City, ST ZIP]</p>
+  <p class="disclaimer">
+    The Coverage Gap Finder provides general educational information only. It is
+    not insurance, legal, or tax advice, not an offer or solicitation of
+    coverage in any state where we are not licensed, and not a guarantee of
+    eligibility, rates, or claim payment. Estimates are based solely on the
+    answers you provide. Policy language and carrier underwriting govern in all
+    cases. Coverage availability and terms vary by state.
+  </p>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>
