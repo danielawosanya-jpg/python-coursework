@@ -14,6 +14,7 @@ from __future__ import annotations
 import html
 from typing import Any
 
+from . import config
 from .sequences import AGENCY
 
 SEVERITY_LABEL = {
@@ -72,6 +73,8 @@ def render_report(lead: dict[str, Any]) -> str:
         f'<section class="wins"><h2>What you already have right</h2>'
         f'<ul>{wins_html}</ul></section>' if wins else ""
     )
+
+    call_to_action = config.cta(AGENCY)
 
     # score ring geometry
     circumference = 2 * 3.14159 * 54
@@ -179,10 +182,10 @@ def render_report(lead: dict[str, Any]) -> str:
   <div class="cta">
     <h2>Want a second set of eyes on the actual policy?</h2>
     <p>This report is built from ten answers. Your declarations page has about
-       forty numbers on it. Send yours over, or book 20 minutes and we will read
-       it together. I am an independent broker, so "keep what you have" is an
-       answer I am free to give - and most reviews end exactly there.</p>
-    <a href="{_esc(AGENCY['calendar_url'])}">Book a 20-minute review</a>
+       forty numbers on it. Send yours over and we will read it together. I am
+       an independent broker, so "keep what you have" is an answer I am free to
+       give - and most reviews end exactly there.</p>
+    <a href="{_esc(call_to_action['href'])}">{_esc(call_to_action['button'])}</a>
   </div>
 
   <footer>

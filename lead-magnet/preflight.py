@@ -34,6 +34,18 @@ def check_agency() -> tuple[str, str]:
     )
 
 
+def check_calendar() -> tuple[str, str]:
+    values = config.load()
+    link = values["calendar_url"]
+    if link == config.DEFAULTS["calendar_url"]:
+        return FAIL, "calendar_url is unset; the report has no call to action."
+    if config.cta(values)["kind"] == "mailto":
+        return WARN, ("Call to action is a mailto: fallback. It works, but a "
+                      "scheduler converts better - people book a slot more "
+                      "readily than they compose an email.")
+    return PASS, f"Call to action books at {link}"
+
+
 def check_site_url() -> tuple[str, str]:
     url = config.load()["site_url"]
     if url == config.DEFAULTS["site_url"]:
@@ -143,6 +155,7 @@ def check_compliance_ack() -> tuple[str, str]:
 CHECKS = [
     ("Agency details", check_agency),
     ("Site URL", check_site_url),
+    ("Call to action", check_calendar),
     ("Admin key", check_admin_key),
     ("Email sending", check_smtp),
     ("Sender alignment", check_sender_alignment),

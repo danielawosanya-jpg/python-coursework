@@ -261,6 +261,18 @@ class TestSequences(unittest.TestCase):
             self.assertTrue(email["subject"])
             self.assertIn("Alex", email["body"])
 
+    def test_mailto_fallback_never_reaches_the_reader_raw(self):
+        from leadmagnet import config as cfg
+        original = dict(sequences.AGENCY)
+        sequences.AGENCY["calendar_url"] = "mailto:daniel@example.com"
+        try:
+            body = sequences.render_sequence(self.lead)[4]["body"]
+            self.assertIn("daniel@example.com", body)
+            self.assertNotIn("mailto:", body)
+        finally:
+            sequences.AGENCY.clear()
+            sequences.AGENCY.update(original)
+
     def test_every_email_carries_an_unsubscribe_link(self):
         for email in sequences.render_sequence(self.lead):
             self.assertIn("/unsubscribe?t=tok123", email["body"])
@@ -379,6 +391,28 @@ class TestConfig(unittest.TestCase):
         self.path.write_text("{not json")
         with self.assertRaises(RuntimeError):
             config.load(self.path)
+
+    def test_cta_url_form_offers_a_booking(self):
+        values = self._real(calendar_url="https://cal.com/dana/review")
+        cta = config.cta(values)
+        self.assertEqual(cta["kind"], "url")
+        self.assertIn("Book", cta["button"])
+        self.assertIn("cal.com", cta["offer"])
+
+    def test_cta_mailto_does_not_promise_a_booking(self):
+        cta = config.cta(self._real(calendar_url="mailto:dana@reyes.example"))
+        self.assertEqual(cta["kind"], "mailto")
+        self.assertNotIn("Book", cta["button"])
+        # A raw "mailto:" pasted mid-sentence looks broken to a reader.
+        self.assertNotIn("mailto:", cta["offer"])
+        self.assertIn("dana@reyes.example", cta["offer"])
+
+    def test_cta_mailto_gets_a_subject_but_keeps_an_existing_one(self):
+        plain = config.cta(self._real(calendar_url="mailto:d@x.example"))
+        self.assertIn("subject=", plain["href"])
+        custom = config.cta(
+            self._real(calendar_url="mailto:d@x.example?subject=Hello"))
+        self.assertTrue(custom["href"].endswith("subject=Hello"))
 
     def test_render_substitutes_every_token(self):
         values = self._real()

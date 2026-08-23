@@ -40,7 +40,8 @@ FIELD_HELP: dict[str, str] = {
     "agency_name": "Agency legal name (a DBA usually needs separate registration)",
     "license": "License number with state, e.g. 'GA license #1234567'",
     "phone": "Business phone shown in the report footer",
-    "calendar_url": "Booking link for the 20-minute review",
+    "calendar_url": ("Booking link for the review. A 'mailto:you@example.com' "
+                     "address works as a fallback if you have no scheduler yet"),
     "site_url": "Public https URL where this is hosted (no trailing slash)",
     "mailing_address": "Physical postal address - CAN-SPAM requires it in every email",
     "states_licensed": "States you are licensed to solicit in, e.g. 'GA, FL'",
@@ -87,6 +88,40 @@ def as_template_vars(config: dict[str, str] | None = None) -> dict[str, Any]:
     """`{{agent_name}}`-style keys for substitution into the static HTML."""
     config = config if config is not None else load()
     return {"{{" + key + "}}": value for key, value in config.items()}
+
+
+def cta(config: dict[str, str] | None = None) -> dict[str, str]:
+    """How to present the call to action.
+
+    A real scheduler gets a "book a time" button. A `mailto:` fallback has to
+    say something honest instead - nobody books a slot by sending an email -
+    and in plain-text email it must render as a bare address, because
+    "mailto:you@example.com" pasted into a sentence looks broken.
+    """
+    config = config if config is not None else load()
+    href = config["calendar_url"].strip()
+
+    if href.lower().startswith("mailto:"):
+        address = href[len("mailto:"):].split("?", 1)[0]
+        if "?" not in href:
+            href = f"{href}?subject=Policy%20review%20request"
+        return {
+            "href": href,
+            "button": "Email me for a policy review",
+            "inline": address,
+            # One action, so no "or" branch - a scheduler is what makes the
+            # second option distinct, and there isn't one here.
+            "offer": f"send your dec pages to {address}",
+            "kind": "mailto",
+        }
+
+    return {
+        "href": href,
+        "button": "Book a 20-minute review",
+        "inline": href,
+        "offer": f"send me your dec pages, or grab 20 minutes here - {href} -",
+        "kind": "url",
+    }
 
 
 def render(markup: str, config: dict[str, str] | None = None) -> str:
