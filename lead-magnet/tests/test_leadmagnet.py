@@ -414,6 +414,22 @@ class TestConfig(unittest.TestCase):
             self._real(calendar_url="mailto:d@x.example?subject=Hello"))
         self.assertTrue(custom["href"].endswith("subject=Hello"))
 
+    def test_scheduler_hosts_are_recognised(self):
+        for url in ("https://calendar.app.google/abc",
+                    "https://calendly.com/daniel/review",
+                    "https://cal.com/x", "https://www.calendly.com/y"):
+            with self.subTest(url=url):
+                self.assertTrue(config.looks_like_scheduler(url))
+
+    def test_non_scheduler_urls_are_not_claimed_as_bookings(self):
+        for url in ("https://awosanyainsurance.com/book",
+                    "https://example.com", "mailto:a@b.example"):
+            with self.subTest(url=url):
+                self.assertFalse(config.looks_like_scheduler(url))
+
+    def test_lookalike_domain_is_not_treated_as_a_scheduler(self):
+        self.assertFalse(config.looks_like_scheduler("https://notcalendly.com/x"))
+
     def test_render_substitutes_every_token(self):
         values = self._real()
         markup = config.render(

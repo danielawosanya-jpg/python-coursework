@@ -124,6 +124,18 @@ def cta(config: dict[str, str] | None = None) -> dict[str, str]:
     }
 
 
+SCHEDULER_HOSTS = (
+    "calendar.app.google", "calendar.google.com", "calendly.com",
+    "cal.com", "savvycal.com", "acuityscheduling.com", "hubspot.com",
+)
+
+
+def looks_like_scheduler(url: str) -> bool:
+    """True for a recognised booking link, so preflight can say so."""
+    host = url.split("//", 1)[-1].split("/", 1)[0].lower().removeprefix("www.")
+    return any(host == h or host.endswith("." + h) for h in SCHEDULER_HOSTS)
+
+
 def render(markup: str, config: dict[str, str] | None = None) -> str:
     """Substitute {{field}} tokens in a page. Unknown tokens are left alone."""
     for token, value in as_template_vars(config).items():

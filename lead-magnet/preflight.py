@@ -43,7 +43,13 @@ def check_calendar() -> tuple[str, str]:
         return WARN, ("Call to action is a mailto: fallback. It works, but a "
                       "scheduler converts better - people book a slot more "
                       "readily than they compose an email.")
-    return PASS, f"Call to action books at {link}"
+    if not link.startswith("https://"):
+        return FAIL, f"calendar_url is {link!r} - use an https link or a mailto:."
+    if config.looks_like_scheduler(link):
+        return PASS, f"Call to action books at {link}"
+    return WARN, (f"Call to action points at {link}, which is not a recognised "
+                  f"scheduler. Fine if it is your own booking page - just "
+                  f"confirm it loads for someone who is not signed in as you.")
 
 
 def check_site_url() -> tuple[str, str]:
