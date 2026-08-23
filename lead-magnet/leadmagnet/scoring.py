@@ -25,7 +25,11 @@ from typing import Any
 INCOME_REPLACEMENT_YEARS = 10       # DIME "I": years of income to replace
 COLLEGE_COST_PER_CHILD = 30_000     # 4-yr in-state public, conservative
 EMERGENCY_FUND_MONTHS = 6
-MIN_AUTO_LIABILITY = 100_000        # per-person bodily injury floor
+MIN_AUTO_LIABILITY = 100_000        # per-person bodily injury floor.
+# This is a recommended floor, NOT any state's legal minimum. Actual
+# minimums differ by state and change by legislature (Florida, for
+# instance, does not mandate bodily-injury liability at all), so the
+# report never tells a reader what their state requires.
 UMBRELLA_TRIGGER_NET_WORTH = 500_000
 DISABILITY_TARGET_PCT = 0.60        # % of income a DI policy should replace
 FINAL_EXPENSE = 15_000              # funeral + estate settlement
@@ -236,7 +240,7 @@ def _check_auto(a: Answers) -> Gap | None:
     # $25k is the state minimum in many states; $50k is not, so don't call it
     # one. Getting this wrong is exactly the kind of detail that costs trust.
     at_minimum = a.auto_liability_limit <= 25_000
-    title = ("Auto liability at state-minimum levels" if at_minimum
+    title = ("Auto liability at or near state-minimum levels" if at_minimum
              else "Auto liability below the recommended floor")
     return Gap(
         key="auto",
