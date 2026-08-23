@@ -1,7 +1,11 @@
 :root{
-  --bg:#ffffff; --alt:#f5f7f9; --ink:#16202e; --muted:#5b6878;
-  --line:#e3e8ef; --accent:#0f5c4a; --accent-dark:#0b4638; --warn:#b4342b;
-  --radius:12px; --shadow:0 1px 3px rgba(16,32,48,.07),0 8px 24px rgba(16,32,48,.06);
+  /* Awosanya Insurance Group - sampled from the brand card */
+  --navy:#191a3d; --navy-soft:#262758; --gold:#ffd166; --gold-deep:#b8841a;
+  --cream:#fdfaef;
+
+  --bg:#ffffff; --alt:var(--cream); --ink:var(--navy); --muted:#5b5f7a;
+  --line:#e6e3d8; --accent:var(--navy); --accent-dark:#0f1029; --warn:#b4342b;
+  --radius:12px; --shadow:0 1px 3px rgba(25,26,61,.08),0 8px 24px rgba(25,26,61,.07);
 }
 *{box-sizing:border-box}
 /* author display rules outrank the UA stylesheet's [hidden], which would
@@ -19,35 +23,42 @@ em{font-style:italic}
 
 /* topbar */
 .topbar{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
-  padding:16px 24px;border-bottom:1px solid var(--line)}
-.brand{font-weight:700}
-.brand-by{color:var(--muted);font-size:14px}
+  padding:14px 24px;background:var(--navy);color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.brand{font-weight:700;color:var(--gold)}
+.brand-by{color:#c9c8d8;font-size:14px}
+.brand-by strong{color:#fff}
 
 /* hero */
-.hero{max-width:1080px;margin:0 auto;padding:56px 24px 40px;
-  display:grid;grid-template-columns:1.35fr 1fr;gap:44px;align-items:start}
+.hero-wrap{background:var(--navy);
+  background-image:radial-gradient(circle at 88% 12%,var(--navy-soft) 0%,transparent 42%);
+  border-bottom:5px solid var(--gold)}
+.hero{max-width:1080px;margin:0 auto;padding:60px 24px 56px;
+  display:grid;grid-template-columns:1.35fr 1fr;gap:44px;align-items:start;
+  color:#fff}
 .eyebrow{font-size:13px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--accent);font-weight:700;margin-bottom:14px}
-.hero h1{font-size:clamp(30px,4.4vw,46px);letter-spacing:-.02em}
-.hero .sub{font-size:18px;color:var(--muted);max-width:34em}
-.trust{list-style:none;padding:0;margin:22px 0 0;color:var(--muted);font-size:15px}
+  color:var(--gold);font-weight:700;margin-bottom:14px}
+.hero h1{font-size:clamp(30px,4.4vw,46px);letter-spacing:-.02em;color:#fff}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero .sub{font-size:18px;color:#c9c8d8;max-width:34em}
+.trust{list-style:none;padding:0;margin:22px 0 0;color:#c9c8d8;font-size:15px}
 .trust li{margin-bottom:5px}
-.hero-card{background:var(--alt);border:1px solid var(--line);
-  border-radius:var(--radius);padding:22px}
+.hero-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,209,102,.28);
+  border-radius:var(--radius);padding:22px;backdrop-filter:blur(2px)}
 .hero-card-label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--muted);font-weight:700;margin-bottom:12px}
+  color:var(--gold);font-weight:700;margin-bottom:12px}
 .preview-row{display:flex;justify-content:space-between;gap:12px;
-  padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:15px}
 .preview-row:last-child{border-bottom:0}
-.preview-row span{color:var(--muted)}
-.preview-row b{white-space:nowrap}
-.hero-card-note{font-size:14px;color:var(--muted);margin:14px 0 0}
+.preview-row span{color:#c9c8d8}
+.preview-row b{white-space:nowrap;color:#fff}
+.hero-card-note{font-size:14px;color:#a9a8bd;margin:14px 0 0}
 
 /* buttons */
 .btn{display:inline-block;border:0;border-radius:9px;padding:12px 22px;
   font:inherit;font-weight:700;cursor:pointer;text-decoration:none;transition:.15s}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-dark)}
+.btn-primary{background:var(--gold);color:var(--navy)}
+.btn-primary:hover{background:#ffc233}
 .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
 .btn-ghost:hover{color:var(--ink)}
 .btn-lg{padding:15px 30px;font-size:17px}
@@ -64,6 +75,7 @@ em{font-style:italic}
   border-radius:var(--radius);padding:22px}
 .band-alt .card{background:var(--alt)}
 .card h3{font-size:18px;color:var(--warn)}
+.band .card{border-top:3px solid var(--gold)}
 .card p{margin:0;color:var(--muted);font-size:15.5px}
 .two-col{max-width:1080px;margin:0 auto;display:grid;
   grid-template-columns:1fr 1fr;gap:28px;color:var(--muted)}
@@ -73,7 +85,7 @@ em{font-style:italic}
 .quiz-shell{max-width:640px;margin:0 auto;background:var(--bg);
   border:1px solid var(--line);border-radius:16px;padding:32px;box-shadow:var(--shadow)}
 .progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
-.progress-fill{height:100%;width:20%;background:var(--accent);transition:width .3s}
+.progress-fill{height:100%;width:20%;background:var(--gold);transition:width .3s}
 .progress-label{font-size:13px;color:var(--muted);margin:8px 0 22px}
 fieldset{border:0;padding:0;margin:0}
 .step{display:none}
@@ -103,7 +115,7 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;bord
 
 /* teaser */
 .teaser{display:flex;align-items:center;gap:20px;background:var(--alt);
-  border:1px solid var(--line);border-left:5px solid var(--accent);
+  border:1px solid var(--line);border-left:5px solid var(--gold);
   border-radius:12px;padding:20px;margin-bottom:22px}
 .teaser-score{display:flex;align-items:baseline;line-height:1}
 .teaser-num{font-size:52px;font-weight:800;letter-spacing:-.03em}
@@ -120,14 +132,18 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;bord
 /* faq */
 .faq{max-width:1080px;margin:0 auto;padding:56px 24px}
 details{border-bottom:1px solid var(--line);padding:16px 0}
-summary{cursor:pointer;font-weight:700;font-size:17px}
+summary{cursor:pointer;font-weight:700;font-size:17px;color:var(--navy)}
 details p{margin:12px 0 0;color:var(--muted)}
 
 /* footer */
-.sitefoot{background:var(--alt);border-top:1px solid var(--line);
-  padding:36px 24px;font-size:14px;color:var(--muted)}
+.sitefoot{background:var(--navy);border-top:5px solid var(--gold);
+  padding:36px 24px;font-size:14px;color:#a9a8bd}
+.sitefoot strong{color:#fff}
+.sitefoot .lines{color:#c9c8d8}
 .sitefoot p{max-width:1080px;margin:0 auto 12px}
 .disclaimer{font-size:12.5px;line-height:1.6}
+
+.tagline{color:var(--gold);font-weight:700;letter-spacing:.02em}
 
 @media (max-width:820px){
   .hero{grid-template-columns:1fr;gap:28px;padding-top:36px}

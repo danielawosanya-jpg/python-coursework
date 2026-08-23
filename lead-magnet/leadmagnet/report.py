@@ -86,29 +86,33 @@ def render_report(lead: dict[str, Any]) -> str:
 <title>Your Coverage Gap Report</title>
 <style>
   :root {{
-    --bg: #f7f8fa; --card: #ffffff; --ink: #16202e; --muted: #5b6878;
-    --line: #e3e8ef; --accent: #0f5c4a; --crit: #b4342b; --imp: #b5721a;
-    --watch: #4a6a8a;
+    /* Awosanya Insurance Group brand palette */
+    --navy: #191a3d; --navy-soft: #262758; --gold: #ffd166; --cream: #fdfaef;
+    --bg: var(--cream); --card: #ffffff; --ink: var(--navy); --muted: #5b5f7a;
+    --line: #e6e3d8; --accent: var(--navy); --crit: #b4342b; --imp: #b5721a;
+    --watch: #6a6d92;
   }}
   * {{ box-sizing: border-box; }}
   body {{ margin:0; background:var(--bg); color:var(--ink);
     font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }}
   .wrap {{ max-width: 780px; margin: 0 auto; padding: 32px 20px 64px; }}
   .masthead {{ font-size:13px; letter-spacing:.12em; text-transform:uppercase;
-    color:var(--muted); margin-bottom:8px; }}
+    color:var(--navy); font-weight:700; margin-bottom:10px;
+    padding-bottom:10px; border-bottom:3px solid var(--gold); }}
   h1 {{ font-size:30px; line-height:1.2; margin:0 0 8px; }}
   .lede {{ color:var(--muted); margin:0 0 28px; }}
-  .scorecard {{ background:var(--card); border:1px solid var(--line);
+  .scorecard {{ background:var(--navy); color:#fff; border:1px solid var(--navy);
     border-radius:14px; padding:24px; display:flex; gap:24px; align-items:center;
     flex-wrap:wrap; }}
+  .scorecard .scoretext p {{ color:#c9c8d8; }}
   .ring {{ flex:0 0 128px; }}
-  .ring text {{ font-weight:700; }}
+  .ring text {{ font-weight:700; fill:#fff; }}
   .scoretext h2 {{ margin:0 0 6px; font-size:22px; }}
   .scoretext p {{ margin:0; color:var(--muted); }}
   .totals {{ display:flex; gap:12px; flex-wrap:wrap; margin:20px 0 32px; }}
   .stat {{ flex:1 1 200px; background:var(--card); border:1px solid var(--line);
-    border-radius:12px; padding:16px; }}
-  .stat b {{ display:block; font-size:24px; }}
+    border-top:3px solid var(--gold); border-radius:12px; padding:16px; }}
+  .stat b {{ display:block; font-size:24px; color:var(--navy); }}
   .stat span {{ color:var(--muted); font-size:13px; }}
   h2.section {{ font-size:20px; margin:32px 0 12px; }}
   .gap {{ background:var(--card); border:1px solid var(--line);
@@ -116,7 +120,7 @@ def render_report(lead: dict[str, Any]) -> str:
     margin-bottom:14px; }}
   .gap--critical {{ border-left-color:var(--crit); }}
   .gap--important {{ border-left-color:var(--imp); }}
-  .gap--clear {{ border-left-color:var(--accent); }}
+  .gap--clear {{ border-left-color:var(--gold); }}
   .gap h3 {{ margin:6px 0 10px; font-size:19px; }}
   .badge {{ font-size:11px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--muted); font-weight:700; }}
@@ -128,12 +132,12 @@ def render_report(lead: dict[str, Any]) -> str:
   .finding {{ margin:0 0 10px; }}
   .fix {{ margin:0; color:var(--muted); }}
   .wins ul {{ background:var(--card); border:1px solid var(--line);
-    border-left:5px solid var(--accent); border-radius:12px; padding:16px 16px 16px 36px; }}
-  .cta {{ background:var(--accent); color:#fff; border-radius:14px;
-    padding:28px; margin-top:32px; }}
+    border-left:5px solid var(--gold); border-radius:12px; padding:16px 16px 16px 36px; }}
+  .cta {{ background:var(--navy); color:#fff; border-radius:14px;
+    border-bottom:5px solid var(--gold); padding:28px; margin-top:32px; }}
   .cta h2 {{ margin:0 0 10px; }}
   .cta p {{ margin:0 0 16px; opacity:.9; }}
-  .cta a {{ display:inline-block; background:#fff; color:var(--accent);
+  .cta a {{ display:inline-block; background:var(--gold); color:var(--navy);
     padding:12px 22px; border-radius:8px; text-decoration:none; font-weight:700; }}
   footer {{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line);
     font-size:13px; color:var(--muted); }}
@@ -148,8 +152,8 @@ def render_report(lead: dict[str, Any]) -> str:
   <div class="scorecard">
     <svg class="ring" viewBox="0 0 128 128" width="128" height="128" role="img"
          aria-label="Protection score {score} out of 100">
-      <circle cx="64" cy="64" r="54" fill="none" stroke="#e3e8ef" stroke-width="12"/>
-      <circle cx="64" cy="64" r="54" fill="none" stroke="#0f5c4a" stroke-width="12"
+      <circle cx="64" cy="64" r="54" fill="none" stroke="#3a3b63" stroke-width="12"/>
+      <circle cx="64" cy="64" r="54" fill="none" stroke="#ffd166" stroke-width="12"
               stroke-linecap="round" stroke-dasharray="{dash:.1f} {circumference:.1f}"
               transform="rotate(-90 64 64)"/>
       <text x="64" y="72" text-anchor="middle" font-size="32">{score}</text>
@@ -176,12 +180,14 @@ def render_report(lead: dict[str, Any]) -> str:
     <h2>Want a second set of eyes on the actual policy?</h2>
     <p>This report is built from ten answers. Your declarations page has about
        forty numbers on it. Send yours over, or book 20 minutes and we will read
-       it together - most reviews end with me telling someone to change nothing.</p>
+       it together. I am an independent broker, so "keep what you have" is an
+       answer I am free to give - and most reviews end exactly there.</p>
     <a href="{_esc(AGENCY['calendar_url'])}">Book a 20-minute review</a>
   </div>
 
   <footer>
-    <p><strong>{_esc(AGENCY['agent_name'])}</strong> &middot;
+    <p><strong>{_esc(AGENCY['agent_name'])}</strong>, Licensed Independent
+       Insurance Broker &middot;
        {_esc(AGENCY['agency_name'])} &middot; {_esc(AGENCY['license'])}<br>
        Licensed in {_esc(AGENCY['states_licensed'])} &middot;
        {_esc(AGENCY['phone'])} &middot; {_esc(AGENCY['mailing_address'])}</p>

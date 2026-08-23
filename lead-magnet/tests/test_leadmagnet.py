@@ -315,6 +315,15 @@ class TestReport(unittest.TestCase):
             has_disability_insurance=True, has_umbrella=True))
         self.assertIn("No material gaps found", html)
 
+    def test_report_carries_the_brand_palette(self):
+        # The style block lives inside an f-string with doubled braces, which
+        # makes a naive edit silently no-op. Assert the colours actually land.
+        html = self._render(scoring.Answers(annual_income=50_000))
+        for token in ("--navy: #191a3d", "--gold: #ffd166", "--cream: #fdfaef"):
+            self.assertIn(token, html)
+        self.assertIn("background:var(--navy)", html)   # scorecard and CTA
+        self.assertNotIn("#0f5c4a", html)               # the old accent colour
+
     def test_name_is_html_escaped(self):
         html = self._render(scoring.Answers(annual_income=50_000),
                             name="<script>alert(1)</script>")

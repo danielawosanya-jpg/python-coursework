@@ -46,8 +46,11 @@
     return out;
   }
 
-  /* --- step navigation ------------------------------------------------ */
-  function show(index) {
+  /* --- step navigation ------------------------------------------------
+     `moved` is false for the initial render. Scrolling or focusing on load
+     would drag a first-time visitor past the headline and straight into the
+     form - they would never see what the page is offering. */
+  function show(index, moved) {
     steps.forEach(function (step, i) {
       step.classList.toggle("is-active", i === index);
     });
@@ -59,18 +62,19 @@
     nextBtn.hidden = index === steps.length - 1;
     submitBtn.hidden = index !== steps.length - 1;
     errorBox.hidden = true;
+    if (!moved) { return; }
     var firstField = steps[index].querySelector("input,select");
-    if (firstField && index > 0) { firstField.focus(); }
+    if (firstField) { firstField.focus(); }
     steps[index].scrollIntoView({ block: "nearest" });
   }
 
   nextBtn.addEventListener("click", function () {
     if (current === steps.length - 2) { loadTeaser(); }
-    show(Math.min(current + 1, steps.length - 1));
+    show(Math.min(current + 1, steps.length - 1), true);
   });
 
   backBtn.addEventListener("click", function () {
-    show(Math.max(current - 1, 0));
+    show(Math.max(current - 1, 0), true);
   });
 
   /* Enter advances instead of submitting a half-filled form. */
@@ -184,5 +188,5 @@
     errorBox.hidden = false;
   }
 
-  show(0);
+  show(0, false);
 })();
