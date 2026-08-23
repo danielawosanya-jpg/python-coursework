@@ -193,7 +193,7 @@ def render_report(lead: dict[str, Any]) -> str:
        Insurance Broker &middot;
        {_esc(AGENCY['agency_name'])} &middot; {_esc(AGENCY['license'])}<br>
        Licensed in {_esc(AGENCY['states_licensed'])} &middot;
-       {_esc(AGENCY['phone'])} &middot; {_esc(AGENCY['mailing_address'])}</p>
+       {_esc(AGENCY['phone'])}</p>
     <p>This report is general educational information, not insurance, legal or
        tax advice, and it is not an offer of coverage or a guarantee of
        eligibility, rates or claim payment. Estimates use common industry rules

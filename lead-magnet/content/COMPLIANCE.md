@@ -46,7 +46,10 @@ The shipped sequence complies. If you rewrite it, keep all of this:
       (`/unsubscribe?t=TOKEN` — implemented and tested)
 - [ ] Opt-outs honored promptly; the code honors them immediately and also
       deletes anything still queued
-- [ ] A valid physical postal address in every message
+- [ ] A valid physical postal address in every message. **A PO Box or a
+      registered private mailbox (CMRA) satisfies this** - it does not have to
+      be your home. The address appears only in email, not on the landing page
+      or the report, so it stays out of search results.
 - [ ] Accurate `From` name and address — no disguised senders
 - [ ] Subject lines that describe the actual contents
 - [ ] Consent captured before the first send — the checkbox is required

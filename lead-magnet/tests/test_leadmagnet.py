@@ -327,6 +327,12 @@ class TestReport(unittest.TestCase):
             has_disability_insurance=True, has_umbrella=True))
         self.assertIn("No material gaps found", html)
 
+    def test_report_does_not_publish_the_postal_address(self):
+        html = report.render_report({
+            "first_name": "Alex", "token": "t",
+            "result": scoring.score(scoring.Answers(annual_income=50_000)).to_dict()})
+        self.assertNotIn(sequences.AGENCY["mailing_address"], html)
+
     def test_report_carries_the_brand_palette(self):
         # The style block lives inside an f-string with doubled braces, which
         # makes a naive edit silently no-op. Assert the colours actually land.
@@ -441,6 +447,14 @@ class TestConfig(unittest.TestCase):
     def test_render_leaves_unknown_tokens_alone(self):
         self.assertIn("{{not_a_field}}",
                       config.render("{{not_a_field}}", self._real()))
+
+    def test_landing_page_does_not_publish_the_postal_address(self):
+        # Deliberate privacy choice: the address is legally required in email,
+        # not on the web. If a state advertising rule means it has to go back
+        # on public pages, update this test along with the markup.
+        markup = (Path(__file__).resolve().parent.parent
+                  / "web" / "index.html").read_text()
+        self.assertNotIn("{{mailing_address}}", markup)
 
     def test_landing_page_has_no_hardcoded_agency_details(self):
         # The licence and address must come from agency.json, not the markup.

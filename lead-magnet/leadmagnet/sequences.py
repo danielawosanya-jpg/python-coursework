@@ -30,6 +30,16 @@ def _money(value: float) -> str:
 
 
 def _signature(token: str) -> str:
+    """The only place the postal address appears.
+
+    CAN-SPAM requires a valid physical postal address in every commercial
+    email. It is deliberately NOT on the landing page or the report, which
+    have no such requirement - that keeps it out of search results and off
+    the open web, reaching only people who asked for the report. A PO Box or
+    a registered private mailbox satisfies the statute just as well as a
+    street address. Check with your compliance contact before adding it back
+    to public pages; some state advertising rules ask for it.
+    """
     return (
         f"\n\n--\n{AGENCY['agent_name']}\n{AGENCY['agency_name']}\n"
         f"{AGENCY['license']} | Licensed in {AGENCY['states_licensed']}\n"
