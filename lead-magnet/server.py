@@ -27,11 +27,12 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from leadmagnet import report, scoring, sequences, storage
+from leadmagnet import config, report, scoring, sequences, storage
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
 ADMIN_KEY = os.environ.get("ADMIN_KEY", "changeme")
 MAX_BODY = 16 * 1024
+AGENCY = config.load()
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -126,6 +127,11 @@ class Handler(BaseHTTPRequestHandler):
         if not str(candidate).startswith(str(WEB_DIR)) or not candidate.is_file():
             return self._html(404, "<h1>404</h1><p><a href='/'>Back to the quiz</a></p>")
         ctype = CONTENT_TYPES.get(candidate.suffix, "application/octet-stream")
+        if candidate.suffix == ".html":
+            # {{agency_name}} and friends are filled from agency.json at serve
+            # time, so the licence and address live in exactly one place.
+            markup = config.render(candidate.read_text(encoding="utf-8"), AGENCY)
+            return self._send(200, markup.encode(), ctype)
         self._send(200, candidate.read_bytes(), ctype)
 
     # --- api -------------------------------------------------------------
@@ -283,6 +289,11 @@ def main() -> None:
     print(f"Admin dashboard: http://{args.host}:{args.port}/admin?key={ADMIN_KEY}")
     if ADMIN_KEY == "changeme":
         print("  (set ADMIN_KEY in your environment before putting this online)")
+    missing = config.placeholders_remaining(AGENCY)
+    if missing:
+        print(f"  WARNING: {len(missing)} agency field(s) still unset "
+              f"({', '.join(missing)}). Run: python3 configure.py")
+        print("  Do not put this online until preflight.py passes.")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

@@ -15,17 +15,11 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-# Fill these in once. Every email and the report footer reads from here.
-AGENCY = {
-    "agent_name": "[Your Name]",
-    "agency_name": "[Your Agency]",
-    "license": "[State] license #[0000000]",
-    "phone": "[555-555-5555]",
-    "calendar_url": "https://[your-calendar-link]",
-    "site_url": "https://[yourdomain.com]",
-    "mailing_address": "[Street, City, ST ZIP]",  # required by CAN-SPAM
-    "states_licensed": "[ST, ST]",
-}
+from . import config
+
+# Loaded from agency.json - edit that file, or run `python3 configure.py`.
+# Every email signature and the report footer read from here.
+AGENCY = config.load()
 
 # step -> days after opt-in
 SCHEDULE = {1: 0, 2: 1, 3: 3, 4: 6, 5: 10, 6: 16}

@@ -1,0 +1,36 @@
+# docker compose up -d
+#
+# Put your secrets in a .env file next to this one (never commit it):
+#   ADMIN_KEY=<24+ random chars>
+#   SMTP_HOST=smtp.yourprovider.com
+#   SMTP_PORT=587
+#   SMTP_USER=you@youragency.com
+#   SMTP_PASS=your-app-password
+#   SMTP_FROM=Your Name <you@youragency.com>
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - leads:/data
+    ports:
+      - "127.0.0.1:8000:8000"   # localhost only; Caddy terminates TLS
+
+  # Sends whatever the queue says is due, then sleeps. Same image, no cron.
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - leads:/data
+    command: >
+      sh -c "while true; do python3 send_worker.py; sleep 900; done"
+
+volumes:
+  leads:

@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from leadmagnet import report, scoring, sequences, storage  # noqa: E402
+from leadmagnet import config, report, scoring, sequences, storage  # noqa: E402
 
 
 class TestScoring(unittest.TestCase):
@@ -320,6 +320,78 @@ class TestReport(unittest.TestCase):
                             name="<script>alert(1)</script>")
         self.assertNotIn("<script>alert(1)</script>", html)
         self.assertIn("&lt;script&gt;", html)
+
+
+class TestConfig(unittest.TestCase):
+    """The agency details are legally significant, so guard the loader."""
+
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.path = Path(self.dir.name) / "agency.json"
+
+    def tearDown(self):
+        self.dir.cleanup()
+
+    def _real(self, **overrides):
+        values = {
+            "agent_name": "Dana Reyes", "agency_name": "Reyes Insurance",
+            "license": "GA license #1234567", "phone": "404-555-0100",
+            "calendar_url": "https://cal.com/dana", "site_url": "https://reyes.example",
+            "mailing_address": "12 Peachtree St, Atlanta, GA 30301",
+            "states_licensed": "GA, FL",
+        }
+        values.update(overrides)
+        return values
+
+    def test_missing_file_falls_back_to_placeholders(self):
+        loaded = config.load(self.path)
+        self.assertEqual(loaded, config.DEFAULTS)
+        self.assertFalse(config.is_configured(loaded))
+
+    def test_roundtrip(self):
+        config.save(self._real(), self.path)
+        self.assertEqual(config.load(self.path)["license"], "GA license #1234567")
+        self.assertTrue(config.is_configured(config.load(self.path)))
+
+    def test_blank_values_fall_back_rather_than_shipping_empty(self):
+        config.save(self._real(phone="   "), self.path)
+        self.assertEqual(config.load(self.path)["phone"], config.DEFAULTS["phone"])
+
+    def test_partial_config_reports_exactly_what_is_missing(self):
+        config.save(self._real(license=config.DEFAULTS["license"]), self.path)
+        self.assertEqual(config.placeholders_remaining(config.load(self.path)),
+                         ["license"])
+
+    def test_trailing_slash_stripped_so_report_urls_stay_clean(self):
+        config.save(self._real(site_url="https://reyes.example/"), self.path)
+        self.assertEqual(config.load(self.path)["site_url"], "https://reyes.example")
+
+    def test_corrupt_json_raises_rather_than_silently_shipping_placeholders(self):
+        self.path.write_text("{not json")
+        with self.assertRaises(RuntimeError):
+            config.load(self.path)
+
+    def test_render_substitutes_every_token(self):
+        values = self._real()
+        markup = config.render(
+            "<p>{{agency_name}} - {{license}} - {{mailing_address}}</p>", values)
+        self.assertIn("Reyes Insurance", markup)
+        self.assertIn("GA license #1234567", markup)
+        self.assertNotIn("{{", markup)
+
+    def test_render_leaves_unknown_tokens_alone(self):
+        self.assertIn("{{not_a_field}}",
+                      config.render("{{not_a_field}}", self._real()))
+
+    def test_landing_page_has_no_hardcoded_agency_details(self):
+        # The licence and address must come from agency.json, not the markup.
+        markup = (Path(__file__).resolve().parent.parent
+                  / "web" / "index.html").read_text()
+        for stale in ("[Your Agency]", "[Your Name]", "[State] license",
+                      "[Street, City", "[ST, ST]"):
+            self.assertNotIn(stale, markup)
+        self.assertIn("{{agency_name}}", markup)
+        self.assertIn("{{license}}", markup)
 
 
 class TestApiContract(unittest.TestCase):

@@ -1,0 +1,9 @@
+# sudo -u leadmagnet crontab -e
+#
+# Sends anything the queue says is due. Every 15 minutes is plenty - the
+# sequence is measured in days, not minutes.
+*/15 * * * * cd /opt/coverage-gap-finder && /usr/bin/python3 send_worker.py >> /var/log/coverage-gap-finder-worker.log 2>&1
+
+# Nightly backup of the lead database. This is your business asset; losing it
+# loses every prospect who ever ran the quiz.
+17 3 * * * cd /opt/coverage-gap-finder && sqlite3 leads.db ".backup '/var/backups/leads-$(date +\%F).db'" && find /var/backups -name 'leads-*.db' -mtime +30 -delete

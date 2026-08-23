@@ -1,0 +1,35 @@
+# Systemd unit for a plain VPS (no Docker).
+#
+#   sudo cp deploy/coverage-gap-finder.service /etc/systemd/system/
+#   sudo cp deploy/coverage-gap-finder.env /etc/coverage-gap-finder.env
+#   sudo chmod 600 /etc/coverage-gap-finder.env
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now coverage-gap-finder
+
+[Unit]
+Description=Coverage Gap Finder
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=leadmagnet
+WorkingDirectory=/opt/coverage-gap-finder
+EnvironmentFile=/etc/coverage-gap-finder.env
+ExecStartPre=/usr/bin/python3 preflight.py --skip-tests
+ExecStart=/usr/bin/python3 server.py --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+# The app needs to write exactly one file. Everything else stays read-only.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/coverage-gap-finder
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,35 @@
+# Caddy handles HTTPS certificates automatically - no certbot, no renewal cron.
+#
+#   sudo caddy run --config /etc/caddy/Caddyfile
+#
+# Replace the domain with yours and point its DNS A record at this server
+# before starting Caddy, or certificate issuance will fail.
+
+yourdomain.com, www.yourdomain.com {
+    encode gzip
+
+    # The app binds to localhost; Caddy is the only thing facing the internet.
+    reverse_proxy 127.0.0.1:8000
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+        -Server
+    }
+
+    # The admin dashboard and CSV export are key-gated in the app, but keeping
+    # them off the public internet entirely is better. Replace with your IP,
+    # or delete this block if you need access from anywhere.
+    @admin path /admin*
+    handle @admin {
+        @notmine not remote_ip 203.0.113.4
+        respond @notmine 404
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    log {
+        output file /var/log/caddy/coverage-gap-finder.log
+    }
+}

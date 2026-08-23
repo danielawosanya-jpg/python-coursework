@@ -1,0 +1,10 @@
+.git
+.gitignore
+__pycache__/
+*.pyc
+leads.db
+leads.db-wal
+leads.db-shm
+worker.log
+.env
+deploy/.env

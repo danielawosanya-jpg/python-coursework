@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 import re
 import sqlite3
 import secrets
@@ -17,7 +18,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-DB_PATH = Path(__file__).resolve().parent.parent / "leads.db"
+# LEADS_DB lets a container mount the database on a volume, so a redeploy
+# doesn't take the lead list with it. Defaults to a file beside the code.
+DB_PATH = Path(os.environ.get("LEADS_DB")
+               or Path(__file__).resolve().parent.parent / "leads.db")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS leads (

@@ -24,7 +24,9 @@ python3 server.py
 Open <http://localhost:8000>. That's the whole install.
 
 ```bash
-python3 -m unittest discover -s tests -v   # 36 tests
+python3 configure.py                       # fill in your agency details
+python3 preflight.py                       # launch gate - is this safe to ship?
+python3 -m unittest discover -s tests -v   # 45 tests
 python3 send_worker.py --dry-run           # preview queued emails
 ADMIN_KEY=yourkey python3 server.py        # then /admin?key=yourkey
 ```
@@ -45,6 +47,8 @@ ADMIN_KEY=yourkey python3 server.py        # then /admin?key=yourkey
 | **Organic playbook** | `content/ORGANIC-PLAYBOOK.md` — the 90-day no-ads distribution plan |
 | **Content bank** | `content/SOCIAL-CONTENT-BANK.md` — 30 ready-to-post pieces |
 | **Compliance** | `content/COMPLIANCE.md` — read before launch |
+| **Deployment** | `content/DEPLOY.md` + `deploy/` — Docker, systemd, Caddy, cron |
+| **Config** | `agency.json` — one place for licence, address and URLs |
 
 ---
 
@@ -90,26 +94,35 @@ stack, and it's what tells you which of the six organic channels to keep doing.
 
 ## Setup for real use
 
-### 1. Replace the placeholders
+### 1. Fill in your agency details
 
-Everything you must fill in is in one dict — `AGENCY` at the top of
-`leadmagnet/sequences.py`:
+```bash
+python3 configure.py
+```
 
-```python
-AGENCY = {
-    "agent_name": "Your Name",
-    "agency_name": "Your Agency",
-    "license": "GA license #1234567",
-    "phone": "555-555-5555",
-    "calendar_url": "https://cal.com/you/review",
-    "site_url": "https://yourdomain.com",
-    "mailing_address": "12 Main St, Atlanta, GA 30301",  # CAN-SPAM requires this
-    "states_licensed": "GA, FL",
+That writes `agency.json`, the single source of truth for every
+legally-significant string in the system — the producer name, the license
+number, and the physical postal address CAN-SPAM requires in each email. The
+landing page, the report footer and every email signature all read from it, so
+you enter each value exactly once.
+
+```json
+{
+  "agent_name": "Dana Reyes",
+  "agency_name": "Reyes Insurance Group",
+  "license": "GA license #1234567",
+  "phone": "404-555-0100",
+  "calendar_url": "https://cal.com/dana/review",
+  "site_url": "https://reyes.example",
+  "mailing_address": "12 Peachtree St, Atlanta, GA 30301",
+  "states_licensed": "GA, FL"
 }
 ```
 
-Then replace the matching `[Your Agency]` / `[Your Name]` / `[State]`
-placeholders in `web/index.html` (topbar and footer).
+These appear in public marketing and in email headers. They must be your real,
+current details — a made-up license number on a live insurance page is
+misrepresentation, and a fake mailing address is a CAN-SPAM violation on every
+email it sends.
 
 ### 2. Tune the assumptions
 
@@ -142,23 +155,44 @@ them the sequence lands in spam and none of the rest matters.
 
 ### 4. Deploy
 
-```bash
-export ADMIN_KEY=$(python3 -c "import secrets;print(secrets.token_urlsafe(24))")
-python3 server.py --host 127.0.0.1 --port 8000
-```
+`content/DEPLOY.md` has the full walkthrough and a post-launch smoke test.
+Ready-made files are in `deploy/`:
 
-Put nginx or Caddy in front for HTTPS and proxy to port 8000. The server binds
-to localhost by default on purpose — don't expose it directly.
+| File | For |
+|------|-----|
+| `Dockerfile`, `docker-compose.yml`, `.dockerignore` | Any Docker host — Railway, Render, Fly |
+| `coverage-gap-finder.service`, `.env` | A plain VPS, via systemd |
+| `Caddyfile` | Automatic HTTPS, plus IP-gating the admin dashboard |
+| `crontab.example` | The email worker and nightly database backups |
+
+The server binds to localhost by default on purpose — put Caddy or nginx in
+front for TLS rather than exposing it directly. On a PaaS, **attach a
+persistent volume at `/data`** and set `LEADS_DB=/data/leads.db`; most PaaS
+filesystems are ephemeral, and without the volume every deploy takes your lead
+list with it.
 
 The stdlib `ThreadingHTTPServer` comfortably handles organic-scale traffic
 (thousands of visits a day). If you ever outgrow it, `Handler` maps cleanly
 onto any WSGI framework — the logic all lives in `leadmagnet/`.
 
-### 5. Read the compliance checklist
+### 5. Run the preflight gate
+
+```bash
+python3 preflight.py
+```
+
+Checks the things that are expensive to get wrong: unfilled agency fields, a
+non-https or missing `site_url`, a default `ADMIN_KEY`, unconfigured SMTP, an
+unwritable database, and a failing test suite. It exits non-zero while anything
+is blocking, so you can wire it into a deploy script and it will refuse to ship
+a misconfigured site.
+
+### 6. Read the compliance checklist
 
 `content/COMPLIANCE.md`. Licensing disclosure, CAN-SPAM, TCPA, state
 advertising rules, and a pre-launch sign-off sheet. Have your carrier's
-compliance contact review the page and the emails before launch.
+compliance contact review the page and the emails before launch. This is the
+one step no script can do for you.
 
 ---
 

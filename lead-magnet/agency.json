@@ -1,0 +1,10 @@
+{
+  "agent_name": "[Your Name]",
+  "agency_name": "[Your Agency]",
+  "license": "[State] license #[0000000]",
+  "phone": "[555-555-5555]",
+  "calendar_url": "https://[your-calendar-link]",
+  "site_url": "https://[yourdomain.com]",
+  "mailing_address": "[Street, City, ST ZIP]",
+  "states_licensed": "[ST, ST]"
+}
