@@ -47,6 +47,7 @@ ADMIN_KEY=yourkey python3 server.py        # then /admin?key=yourkey
 | **Organic playbook** | `content/ORGANIC-PLAYBOOK.md` — the 90-day no-ads distribution plan |
 | **Content bank** | `content/SOCIAL-CONTENT-BANK.md` — 30 ready-to-post pieces |
 | **Compliance** | `content/COMPLIANCE.md` — read before launch |
+| **Email/DNS** | `content/EMAIL-SETUP.md` — SPF, DKIM, DMARC and deliverability |
 | **Deployment** | `content/DEPLOY.md` + `deploy/` — Docker, systemd, Caddy, cron |
 | **Config** | `agency.json` — one place for licence, address and URLs |
 
@@ -133,6 +134,10 @@ tests.
 
 ### 3. Configure email
 
+`content/EMAIL-SETUP.md` covers provider choice and the SPF/DKIM/DMARC records.
+Do the DNS part first — without it the sequence lands in spam and nothing else
+in this system matters.
+
 ```bash
 export SMTP_HOST=smtp.yourprovider.com
 export SMTP_PORT=587
@@ -160,6 +165,7 @@ Ready-made files are in `deploy/`:
 
 | File | For |
 |------|-----|
+| `install.sh` | One-command install on a fresh Ubuntu/Debian VPS |
 | `Dockerfile`, `docker-compose.yml`, `.dockerignore` | Any Docker host — Railway, Render, Fly |
 | `coverage-gap-finder.service`, `.env` | A plain VPS, via systemd |
 | `Caddyfile` | Automatic HTTPS, plus IP-gating the admin dashboard |

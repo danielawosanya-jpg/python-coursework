@@ -20,16 +20,56 @@ into a deploy script and it will refuse to ship a misconfigured site.
 |---|---|
 | A domain | Report links in emails are absolute. Without one, nothing in the sequence works. |
 | A host | Anything that runs Python 3.10+. The app has no dependencies. |
-| An email sender | SMTP credentials, plus SPF and DKIM on the sending domain. |
+| An email sender | SMTP credentials, plus SPF and DKIM on the sending domain. See `EMAIL-SETUP.md`. |
 | Compliance sign-off | See `COMPLIANCE.md`. This is a human step, not a technical one. |
 
 **Do the SPF/DKIM part before you send to anyone.** Without them the sequence
 lands in spam, and a domain that starts out in spam folders is hard to
-rehabilitate. Your email provider's docs will have the two DNS records.
+rehabilitate. `EMAIL-SETUP.md` walks through provider choice, the three DNS
+records, and how to verify placement before you promote the link anywhere.
 
 ---
 
-## Option A — Docker (works on Railway, Render, Fly, or any Docker host)
+## Option A — Ubuntu VPS, one command (recommended)
+
+On a fresh Ubuntu or Debian box, with your domain's A record already pointing
+at its IP:
+
+```bash
+git clone <your-repo> ~/coverage-gap-finder
+cd ~/coverage-gap-finder/lead-magnet
+sudo bash deploy/install.sh yourdomain.com
+```
+
+That installs Python and Caddy, creates a `leadmagnet` system user, puts the
+app in `/opt/coverage-gap-finder`, generates a random `ADMIN_KEY`, installs the
+systemd service, configures HTTPS, and schedules the email worker and nightly
+database backups.
+
+**It stops before starting the public site if preflight fails** — so an
+unfilled license number or a default admin key blocks the deploy rather than
+shipping. On a fresh install that's expected: fill in your details, then
+finish.
+
+```bash
+cd /opt/coverage-gap-finder
+sudo -u leadmagnet python3 configure.py
+sudo systemctl enable --now coverage-gap-finder
+sudo systemctl reload caddy
+```
+
+Two things the script deliberately leaves to you:
+
+- **The admin IP gate.** `/etc/caddy/Caddyfile` restricts `/admin` to a
+  placeholder IP. Put your own there, or delete the block if you need access
+  from anywhere. Then `sudo systemctl reload caddy`.
+- **Email credentials.** `/etc/coverage-gap-finder.env` has empty SMTP fields.
+  See `EMAIL-SETUP.md` — the DNS records come first.
+
+Re-running the script is safe. It preserves your `agency.json`, your lead
+database, and your env file.
+
+## Option B — Docker (works on Railway, Render, Fly, or any Docker host)
 
 Simplest if your host speaks Docker. The lead database lives on a volume, so
 redeploys don't destroy it.
@@ -48,9 +88,9 @@ variables in the dashboard, and **attach a persistent volume at `/data`**. Most
 PaaS filesystems are ephemeral — without the volume you lose every lead on each
 deploy.
 
-## Option B — A plain VPS ($5/month, and the one I'd pick)
+## Option C — A VPS, step by step
 
-Full control, no platform limits, and Caddy handles certificates for you.
+What `install.sh` does, if you'd rather do it by hand or adapt it.
 
 ```bash
 # as root on a fresh Ubuntu box
@@ -86,7 +126,7 @@ Finally the email worker and backups:
 sudo -u leadmagnet crontab -e     # paste deploy/crontab.example
 ```
 
-## Option C — Your existing web host
+## Option D — Your existing web host
 
 If you already pay for hosting that supports Python (a cPanel host, a
 university box, a home server), it will run this. You need: Python 3.10+, the
