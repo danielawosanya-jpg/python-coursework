@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -32,6 +33,34 @@ def check_agency() -> tuple[str, str]:
         f"{len(remaining)} field(s) still placeholder: {', '.join(remaining)}. "
         "Run: python3 configure.py"
     )
+
+
+# CAN-SPAM wants a valid physical postal address - one that mail actually
+# reaches. A street name with no number does not qualify, and it is the
+# easiest thing in the world to paste in by accident.
+ZIP_RE = re.compile(r"\b\d{5}(?:-\d{4})?\b")
+PO_BOX_RE = re.compile(r"\bp\.?\s*o\.?\s*box\b", re.IGNORECASE)
+STREET_NUMBER_RE = re.compile(r"\b\d+[A-Za-z]?\s+[A-Za-z]")
+
+
+def check_mailing_address() -> tuple[str, str]:
+    address = config.load()["mailing_address"]
+    if address == config.DEFAULTS["mailing_address"]:
+        return FAIL, ("mailing_address is unset. CAN-SPAM requires a physical "
+                      "postal address in every email you send.")
+
+    problems = []
+    if not ZIP_RE.search(address):
+        problems.append("no ZIP code")
+    if not (STREET_NUMBER_RE.search(address) or PO_BOX_RE.search(address)):
+        problems.append("no street number or PO Box")
+
+    if problems:
+        return FAIL, (
+            f"{address!r} looks undeliverable ({'; '.join(problems)}). "
+            f"CAN-SPAM requires an address that mail actually reaches."
+        )
+    return PASS, f"Mailing address looks deliverable: {address}"
 
 
 def check_calendar() -> tuple[str, str]:
@@ -161,6 +190,7 @@ def check_compliance_ack() -> tuple[str, str]:
 CHECKS = [
     ("Agency details", check_agency),
     ("Site URL", check_site_url),
+    ("Mailing address", check_mailing_address),
     ("Call to action", check_calendar),
     ("Admin key", check_admin_key),
     ("Email sending", check_smtp),

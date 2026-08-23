@@ -478,6 +478,43 @@ class TestSenderGuards(unittest.TestCase):
                          self.preflight.CONSUMER_MAIL_DOMAINS)
 
 
+class TestMailingAddressGuard(unittest.TestCase):
+    """CAN-SPAM needs an address mail actually reaches."""
+
+    def setUp(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        import preflight
+        self.pf = preflight
+
+    def _deliverable(self, address):
+        return bool(self.pf.ZIP_RE.search(address)) and bool(
+            self.pf.STREET_NUMBER_RE.search(address)
+            or self.pf.PO_BOX_RE.search(address))
+
+    def test_complete_addresses_pass(self):
+        for address in (
+            "1234 Arden Ridge Dr, Suwanee, GA 30024",
+            "1234 Arden Ridge Dr Suite 5, Suwanee, GA 30024-1234",
+            "PO Box 417, Suwanee, GA 30024",
+            "P.O. Box 417, Suwanee, GA 30024",
+            "12B Peachtree St NE, Atlanta, GA 30309",
+        ):
+            with self.subTest(address=address):
+                self.assertTrue(self._deliverable(address))
+
+    def test_street_without_a_number_is_rejected(self):
+        self.assertFalse(self._deliverable("Arden Ridge Dr, Suwanee, GA 30024"))
+
+    def test_missing_zip_is_rejected(self):
+        self.assertFalse(self._deliverable("1234 Arden Ridge Dr, Suwanee, GA"))
+
+    def test_city_and_state_alone_is_rejected(self):
+        self.assertFalse(self._deliverable("Suwanee GA"))
+
+    def test_a_bare_zip_is_not_enough(self):
+        self.assertFalse(self._deliverable("Suwanee, GA 30024"))
+
+
 class TestApiContract(unittest.TestCase):
     """The teaser endpoint must never leak the gap detail the email buys."""
 
