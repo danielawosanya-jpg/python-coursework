@@ -394,6 +394,31 @@ class TestConfig(unittest.TestCase):
         self.assertIn("{{license}}", markup)
 
 
+class TestSenderGuards(unittest.TestCase):
+    """Guards against the two ways a sending address silently breaks."""
+
+    def setUp(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        import preflight
+        self.preflight = preflight
+
+    def test_sender_domain_parses_both_address_forms(self):
+        parse = self.preflight._sender_domain
+        self.assertEqual(parse("dana@reyes.example"), "reyes.example")
+        self.assertEqual(parse("Dana Reyes <dana@Reyes.Example>"), "reyes.example")
+        self.assertEqual(parse("  dana@reyes.example  "), "reyes.example")
+
+    def test_consumer_domains_are_recognised(self):
+        for address in ("a@gmail.com", "Someone <b@yahoo.com>", "c@outlook.com"):
+            with self.subTest(address=address):
+                self.assertIn(self.preflight._sender_domain(address),
+                              self.preflight.CONSUMER_MAIL_DOMAINS)
+
+    def test_business_domain_is_not_flagged_as_consumer(self):
+        self.assertNotIn(self.preflight._sender_domain("dana@reyes.example"),
+                         self.preflight.CONSUMER_MAIL_DOMAINS)
+
+
 class TestApiContract(unittest.TestCase):
     """The teaser endpoint must never leak the gap detail the email buys."""
 

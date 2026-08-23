@@ -53,6 +53,24 @@ def check_admin_key() -> tuple[str, str]:
     return PASS, "ADMIN_KEY is set to a non-default value."
 
 
+# Free mailbox providers publish a strict DMARC policy on their own domains.
+# Sending bulk mail as one of these through any other provider fails DMARC
+# alignment and is quarantined - it is not a style preference, it is broken.
+CONSUMER_MAIL_DOMAINS = {
+    "gmail.com", "googlemail.com", "yahoo.com", "ymail.com", "outlook.com",
+    "hotmail.com", "live.com", "msn.com", "aol.com", "icloud.com", "me.com",
+    "proton.me", "protonmail.com", "gmx.com", "mail.com", "zoho.com",
+}
+
+
+def _sender_domain(address: str) -> str:
+    """Pull the domain out of either 'a@b.com' or 'Name <a@b.com>'."""
+    if "<" in address and ">" in address:
+        address = address[address.rfind("<") + 1:address.rfind(">")]
+    _, _, domain = address.strip().rpartition("@")
+    return domain.strip().lower()
+
+
 def check_smtp() -> tuple[str, str]:
     host = os.environ.get("SMTP_HOST")
     if not host:
@@ -61,7 +79,39 @@ def check_smtp() -> tuple[str, str]:
     sender = os.environ.get("SMTP_FROM") or os.environ.get("SMTP_USER")
     if not sender:
         return FAIL, "SMTP_HOST is set but neither SMTP_FROM nor SMTP_USER is."
+
+    domain = _sender_domain(sender)
+    if domain in CONSUMER_MAIL_DOMAINS:
+        return FAIL, (
+            f"SMTP_FROM is on {domain}, a consumer mailbox domain. You cannot "
+            f"authenticate mail for it, so the sequence will fail DMARC and be "
+            f"quarantined. Send as an address on your own domain instead - see "
+            f"content/EMAIL-SETUP.md."
+        )
     return PASS, f"SMTP configured via {host} as {sender}"
+
+
+def check_sender_alignment() -> tuple[str, str]:
+    """The From domain should match the site domain, or DMARC gets unhappy."""
+    sender = os.environ.get("SMTP_FROM") or os.environ.get("SMTP_USER")
+    if not sender:
+        return WARN, "No sender configured yet; alignment not checked."
+
+    site = config.load()["site_url"]
+    if site == config.DEFAULTS["site_url"]:
+        return WARN, "site_url is unset; cannot check sender alignment."
+
+    site_domain = site.split("//", 1)[-1].split("/", 1)[0].lower()
+    site_domain = site_domain.removeprefix("www.")
+    from_domain = _sender_domain(sender)
+
+    if from_domain == site_domain or from_domain.endswith("." + site_domain):
+        return PASS, f"Sender {from_domain} aligns with the site domain."
+    return WARN, (
+        f"You send as {from_domain} but the site is {site_domain}. That works "
+        f"if {from_domain} is authenticated, but readers trust a From address "
+        f"that matches the link they clicked."
+    )
 
 
 def check_database() -> tuple[str, str]:
@@ -95,6 +145,7 @@ CHECKS = [
     ("Site URL", check_site_url),
     ("Admin key", check_admin_key),
     ("Email sending", check_smtp),
+    ("Sender alignment", check_sender_alignment),
     ("Lead database", check_database),
     ("Tests", check_tests),
     ("Compliance sign-off", check_compliance_ack),
