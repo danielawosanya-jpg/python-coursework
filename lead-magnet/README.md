@@ -14,6 +14,16 @@ no SaaS subscription. It runs on a $5 VPS, a free-tier host, or a laptop.
 
 ---
 
+## Two ways to run it
+
+**No server** — `python3 build_static.py`, then drag `static/` onto Netlify.
+Live today, $0, no domain and no sending account. You lose the automated
+follow-up sequence. See `content/NO-SERVER.md`.
+
+**Full system** — the Python server below, with the six-email sequence,
+lead database and admin dashboard. Needs a domain, a host and an
+authenticated sender. See `content/DEPLOY.md`.
+
 ## Run it
 
 ```bash
@@ -26,7 +36,7 @@ Open <http://localhost:8000>. That's the whole install.
 ```bash
 python3 configure.py                       # fill in your agency details
 python3 preflight.py                       # launch gate - is this safe to ship?
-python3 -m unittest discover -s tests -v   # 45 tests
+python3 -m unittest discover -s tests -v   # 69 tests
 python3 send_worker.py --dry-run           # preview queued emails
 ADMIN_KEY=yourkey python3 server.py        # then /admin?key=yourkey
 ```
@@ -46,6 +56,7 @@ ADMIN_KEY=yourkey python3 server.py        # then /admin?key=yourkey
 | **Admin dashboard** | `/admin?key=…` — leads, scores, source attribution, CSV export |
 | **Organic playbook** | `content/ORGANIC-PLAYBOOK.md` — the 90-day no-ads distribution plan |
 | **Content bank** | `content/SOCIAL-CONTENT-BANK.md` — 30 ready-to-post pieces |
+| **Static build** | `build_static.py` + `static/` — the no-server version |
 | **Compliance** | `content/COMPLIANCE.md` — read before launch |
 | **Email/DNS** | `content/EMAIL-SETUP.md` — SPF, DKIM, DMARC and deliverability |
 | **Deployment** | `content/DEPLOY.md` + `deploy/` — Docker, systemd, Caddy, cron |

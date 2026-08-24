@@ -1,0 +1,13 @@
+# Netlify config for the static Coverage Gap Finder.
+# Deploy this folder - there is nothing to build.
+
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "SAMEORIGIN"
